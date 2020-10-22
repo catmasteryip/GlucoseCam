@@ -1,0 +1,50 @@
+apply plugin: 'com.android.application'
+apply plugin: 'com.chaquo.python'
+
+android {
+    compileSdkVersion 30
+    buildToolsVersion "30.0.2"
+
+    defaultConfig {
+        applicationId "com.edmondstudio.glucosecam"
+        minSdkVersion 21
+        targetSdkVersion 30
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        ndk {
+            abiFilters "armeabi-v7a"
+        }
+        python {
+            pip {
+                install "numpy"
+                install "opencv-contrib-python"
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: "libs", include: ["*.jar"])
+    implementation 'androidx.appcompat:appcompat:1.2.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.2'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.2'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
+
+    // api for simpler camera https://natario1.github.io/CameraView/home
+    api 'com.otaliastudios:cameraview:2.6.4'
+    // camerakit for easier camera https://github.com/CameraKit/camerakit-android
+//    implementation 'com.camerakit:camerakit:1.0.0-beta3.11'
+//    implementation 'com.camerakit:jpegkit:0.1.0'
+//    implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.3.0'
+//    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.0.0'
+}
