@@ -37,6 +37,7 @@ import com.chaquo.python.PyObject;
 import com.chaquo.python.Python;
 import com.chaquo.python.android.AndroidPlatform;
 import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
@@ -78,21 +79,27 @@ public class MainActivity extends AppCompatActivity {
         long[] lengthArray;
         final List<Entry> chartList = new ArrayList<Entry>();
 
-//        final Button clearBtn = findViewById(R.id.button);
-//        final boolean[] clear = {false};
+        final Button clearBtn = findViewById(R.id.button);
+        final boolean[] clear = {false};
 
-//        clearBtn.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                if (clear[0]){
-//                    clear[0] = false;
-//                    clearBtn.setText("Clear");
-//                }else{
-//                    clear[0] = true;
-//                    clearBtn.setText("Start");
-//                }
-//            }
-//        });
+        clearBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (clear[0]){
+
+                    clearBtn.setText("Clear");
+                    clear[0] = false;
+                }else{
+                    chart.clear();
+                    if (chartList.size()>0){
+                        chartList.clear();
+                    }
+                    x = 0f;
+                    clearBtn.setText("Start");
+                    clear[0] = true;
+                }
+            }
+        });
 
         final long[] start_time = {System.currentTimeMillis()};
         final long[] app_count = {System.currentTimeMillis()};
@@ -124,22 +131,22 @@ public class MainActivity extends AppCompatActivity {
                         final Bitmap patchBitmap = pyResults.patchbitmap;
                         final Bitmap finalPatchBitmap = rotate90(patchBitmap);
 
-
-
                         String lengthString = lengthCM.substring(0, 3);
 
                         float lengthFloat = Float.parseFloat(lengthString);
                         LineData chartData = null;
-                        if ((lengthFloat > 0) && ((time - start_time[0]) > 1000)) {
+                        if ((lengthFloat > 0) && ((time - start_time[0]) > 1000) && !clear[0]) {
                             x += 1f;
                             Entry newX = new Entry(x, lengthFloat);
                             chartList.add(newX);
                             LineDataSet chartDataset = new LineDataSet(chartList, "Length");
                             chartData = new LineData(chartDataset);
+                            chartData.setDrawValues(false);
                             chart.setData(chartData);
                             chart.invalidate();
                             start_time[0] = time;
                         }
+
                         handler.post(new Runnable() {
                             @Override
                             public void run() {
