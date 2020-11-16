@@ -1,5 +1,6 @@
 package com.edmondstudio.glucosecam;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -17,9 +18,11 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.Surface;
 import android.view.SurfaceView;
 import android.view.TextureView;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -33,6 +36,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.chaquo.python.PyObject;
 import com.chaquo.python.Python;
 import com.chaquo.python.android.AndroidPlatform;
+import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineData;
+import com.github.mikephil.charting.data.LineDataSet;
 import com.otaliastudios.cameraview.CameraView;
 import com.otaliastudios.cameraview.controls.PictureFormat;
 import com.otaliastudios.cameraview.controls.Preview;
@@ -41,7 +48,10 @@ import com.otaliastudios.cameraview.frame.FrameProcessor;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 //import static com.camerakit.CameraKitView.*;
 
@@ -50,6 +60,7 @@ public class MainActivity extends AppCompatActivity {
     private ImageView imageView, imageView2;
     private TextView glucoseLevelText;
     private TextureView textureView;
+    private float x = 0f;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -62,65 +73,87 @@ public class MainActivity extends AppCompatActivity {
         camera.setLifecycleOwner(this);
 
         final Handler handler = new Handler();
-//        final View container = findViewById(R.id.container);
+        final LineChart chart = findViewById(R.id.chart);
+
+        long[] lengthArray;
+        final List<Entry> chartList = new ArrayList<Entry>();
+
+//        final Button clearBtn = findViewById(R.id.button);
+//        final boolean[] clear = {false};
+
+//        clearBtn.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                if (clear[0]){
+//                    clear[0] = false;
+//                    clearBtn.setText("Clear");
+//                }else{
+//                    clear[0] = true;
+//                    clearBtn.setText("Start");
+//                }
+//            }
+//        });
+
+        final long[] start_time = {System.currentTimeMillis()};
+        final long[] app_count = {System.currentTimeMillis()};
+
         camera.addFrameProcessor(new FrameProcessor() {
+            @SuppressLint("LongLogTag")
             @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
             @WorkerThread
             public void process(@NonNull Frame frame) {
-//                long time = frame.getTime();
-//                Size size = frame.getSize();
-//                int format = frame.getFormat();
-//                int userRotation = frame.getRotationToUser();
-//                int viewRotation = frame.getRotationToView();
+                long time = System.currentTimeMillis();
                 int frameWidth = frame.getSize().getWidth();
                 int frameHeight = frame.getSize().getHeight();
                 if (frame.getDataClass() == byte[].class) {
                     // Process byte array...
-                    ByteArrayOutputStream out = new ByteArrayOutputStream();
+                    try {
+                        ByteArrayOutputStream out = new ByteArrayOutputStream();
 
-                    byte[] data = frame.getData();
-                    YuvImage yuvImage = new YuvImage(data, ImageFormat.NV21, frameWidth, frameHeight, null);
-                    yuvImage.compressToJpeg(new Rect(0, 0, frame.getSize().getWidth(), frame.getSize().getHeight()), 90, out);
-                    byte[] frameBytes = out.toByteArray();
+                        byte[] data = frame.getData();
+                        YuvImage yuvImage = new YuvImage(data, ImageFormat.NV21, frameWidth, frameHeight, null);
+                        yuvImage.compressToJpeg(new Rect(0, 0, frame.getSize().getWidth(), frame.getSize().getHeight()), 90, out);
+                        byte[] frameBytes = out.toByteArray();
 
-                    PyResults pyResults = runpython(frameBytes);
-                    final String length = pyResults.length;
-//                    final float[] rectangleArray = pyResults.rect;
+                        PyResults pyResults = runpython(frameBytes);
+                        final String lengthCM = pyResults.length;
 
-                    final Bitmap pythonBitmap = pyResults.bitmap;
-                    final Bitmap uprightImageBitmap = rotate90(pythonBitmap);
-//                    final Bitmap bitmap = Bitmap.createBitmap(imageView.getWidth(), imageView.getHeight(),Bitmap.Config.ARGB_8888);
-//                    Canvas canvas = new Canvas(bitmap);
-//                    Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-//                    paint.setColor(Color.GREEN);
-//                    paint.setStyle(Paint.Style.STROKE);
-//                    paint.setStrokeWidth(10);
-//                    Path path = new Path();
-//                    path.addCircle(0,0,50,Path.Direction.CW);
-//                    path.addCircle(rectangleArray[0],rectangleArray[1],50,Path.Direction.CW);
-//                    Log.i("python result",String.valueOf(rectangleArray[0]));
-//                    if (rectangleArray.length == 8){
-//                        for (int i = 2; i < rectangleArray.length; i+=2) {
-//                            path.lineTo(rectangleArray[i],rectangleArray[i+1]);
-//                            path.moveTo(rectangleArray[i],rectangleArray[i+1]);
-////                            Log.i("rectangleCoord",String.valueOf(rectangleArray[i]));
-//                        }
-////                        path.lineTo(rectangleArray[-2],rectangleArray[-1]);
-//                    }
-//                    canvas.drawPath(path,paint);
+                        final Bitmap pythonBitmap = pyResults.bitmap;
+                        final Bitmap uprightImageBitmap = rotate90(pythonBitmap);
+                        final Bitmap patchBitmap = pyResults.patchbitmap;
+                        final Bitmap finalPatchBitmap = rotate90(patchBitmap);
 
 
-                    handler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            glucoseLevelText.setText(length);
-                            imageView2.setImageBitmap(uprightImageBitmap);
-//                            imageView2.setImageBitmap(pythonBitmap);
+
+                        String lengthString = lengthCM.substring(0, 3);
+
+                        float lengthFloat = Float.parseFloat(lengthString);
+                        LineData chartData = null;
+                        if ((lengthFloat > 0) && ((time - start_time[0]) > 1000)) {
+                            x += 1f;
+                            Entry newX = new Entry(x, lengthFloat);
+                            chartList.add(newX);
+                            LineDataSet chartDataset = new LineDataSet(chartList, "Length");
+                            chartData = new LineData(chartDataset);
+                            chart.setData(chartData);
+                            chart.invalidate();
+                            start_time[0] = time;
                         }
-                    });
+                        handler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                glucoseLevelText.setText(lengthCM);
+                                imageView2.setImageBitmap(uprightImageBitmap);
+                                imageView.setImageBitmap(finalPatchBitmap);
+                            }
+                        });
 
-                } else if (frame.getDataClass() == Image.class) {
+                    } catch(Exception e){
+                        Log.e("addFrameProcessor Exception", e.toString());
+                    }
+
+                } else if(frame.getDataClass()==Image .class){
                     Image image = frame.getData();
                     // Process android.media.Image...
                 }
@@ -128,22 +161,22 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private byte[] bitmap2byte(Bitmap bitmap){
-
-        int size = bitmap.getRowBytes() * bitmap.getHeight();
-        ByteBuffer byteBuffer = ByteBuffer.allocate(size);
-        bitmap.copyPixelsToBuffer(byteBuffer);
-        byte[] byteArray = byteBuffer.array();
-        return byteArray;
-    }
-
-    public static Bitmap loadBitmapFromView(View v) {
-        Bitmap b = Bitmap.createBitmap( v.getLayoutParams().width, v.getLayoutParams().height, Bitmap.Config.ARGB_8888);
-        Canvas c = new Canvas(b);
-        v.layout(0, 0, v.getLayoutParams().width, v.getLayoutParams().height);
-        v.draw(c);
-        return b;
-    }
+//    private byte[] bitmap2byte(Bitmap bitmap){
+//
+//        int size = bitmap.getRowBytes() * bitmap.getHeight();
+//        ByteBuffer byteBuffer = ByteBuffer.allocate(size);
+//        bitmap.copyPixelsToBuffer(byteBuffer);
+//        byte[] byteArray = byteBuffer.array();
+//        return byteArray;
+//    }
+//
+//    public static Bitmap loadBitmapFromView(View v) {
+//        Bitmap b = Bitmap.createBitmap( v.getLayoutParams().width, v.getLayoutParams().height, Bitmap.Config.ARGB_8888);
+//        Canvas c = new Canvas(b);
+//        v.layout(0, 0, v.getLayoutParams().width, v.getLayoutParams().height);
+//        v.draw(c);
+//        return b;
+//    }
 
     private Bitmap rotate90(Bitmap bitmapOrg){
         Matrix matrix = new Matrix();
@@ -156,12 +189,12 @@ public class MainActivity extends AppCompatActivity {
 
     public class PyResults {
         private String length;
-        private float[] rect;
+        private Bitmap patchbitmap;
         private Bitmap bitmap;
 
-        public PyResults(String length, float[] rect, Bitmap bitmap) {
+        public PyResults(String length, Bitmap patchbitmap, Bitmap bitmap) {
             this.length = length;
-            this.rect = rect;
+            this.patchbitmap = patchbitmap;
             this.bitmap = bitmap;
         }
 
@@ -177,18 +210,19 @@ public class MainActivity extends AppCompatActivity {
                 PyObject findPatch = py.getModule("findPatch");
                 PyObject PyResultObjects = findPatch.callAttr("detect_patch", imageBytes);
                 List PyResultList = PyResultObjects.asList();
-                String length = (String) PyResultList.get(1).toString();
-                PyObject PyRectangle = (PyObject) PyResultList.get(0);
-                float[] rectangleArray = PyRectangle.toJava(float[].class);
-//                Log.i("rectangle", String.valueOf(rectangleArray[0]));
-                Log.e("python", "is running");
+                PyObject lengthPy = (PyObject) PyResultList.get(1);
+                String length = (String) lengthPy.toString();
+//                Log.i("length", PyResultList.get(1).getClass().getName());
+                PyObject pyPatchBytes = (PyObject) PyResultList.get(0);
+                byte[] pyPatchByteArray = pyPatchBytes.toJava(byte[].class);
+                Bitmap patchbitmap = BitmapFactory.decodeByteArray(pyPatchByteArray, 0, pyPatchByteArray.length);
 
                 PyObject finalImageBytes = (PyObject) PyResultList.get(2);
                 byte[] finalImageByteArray = finalImageBytes.toJava(byte[].class);
                 Bitmap bitmap = BitmapFactory.decodeByteArray(finalImageByteArray, 0, finalImageByteArray.length);
 
                 pyResults.length = length;
-                pyResults.rect = rectangleArray;
+                pyResults.patchbitmap = patchbitmap;
                 pyResults.bitmap = bitmap;
 
             }catch (Exception e){

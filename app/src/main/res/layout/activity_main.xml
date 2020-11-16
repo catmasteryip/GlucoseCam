@@ -20,29 +20,77 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="100dp"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="68dp"
         android:layout_marginEnd="100dp"
-        android:text="Glucose Level"
+        android:text="Patch Length"
+        android:textSize="30sp"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/imageView2" />
 
     <ImageView
         android:id="@+id/imageView2"
-        android:layout_width="match_parent"
-        android:layout_height="300dp"
+        android:layout_width="219dp"
+        android:layout_height="270dp"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="?attr/selectableItemBackground"
-        tools:layout_editor_absoluteX="1dp" />
+        app:srcCompat="?attr/selectableItemBackground" />
 
     <ImageView
         android:id="@+id/imageView"
-        android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:layout_marginTop="368dp"
+        android:layout_width="127dp"
+        android:layout_height="268dp"
+        app:layout_constraintBottom_toBottomOf="@+id/imageView2"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="?attr/selectableItemBackground"
-        tools:layout_editor_absoluteX="0dp" />
+        app:srcCompat="?attr/selectableItemBackground" />
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="66dp"
+        android:layout_marginTop="10dp"
+        android:text="Camera"
+        android:textSize="24sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imageView2" />
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="41dp"
+        android:text="Patch"
+        android:textSize="24sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imageView" />
+
+    <com.github.mikephil.charting.charts.LineChart
+        android:id="@+id/chart"
+        android:layout_width="300dp"
+        android:layout_height="100dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginEnd="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.683"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/glucoseLevel" />
+
+<!--    <Button-->
+<!--        android:id="@+id/button"-->
+<!--        android:layout_width="100dp"-->
+<!--        android:layout_height="54dp"-->
+<!--        android:layout_marginStart="18dp"-->
+<!--        android:layout_marginTop="68dp"-->
+<!--        android:layout_marginEnd="33dp"-->
+<!--        android:text="Clear"-->
+<!--        app:layout_constraintEnd_toEndOf="parent"-->
+<!--        app:layout_constraintStart_toEndOf="@+id/glucoseLevel"-->
+<!--        app:layout_constraintTop_toBottomOf="@+id/imageView2" />-->
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 

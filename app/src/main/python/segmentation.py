@@ -4,18 +4,17 @@ import cv2
 
 def OtsuSegmentation(bgr):
     '''
-        Carry out k-means clustering segmentation on image
+        Carry out ostu's segmentation on image
         Args:
             bgr(ndarray): BGR image
-            k(int): number of cluseters/segments desired
         Returns:
-            seg_img(ndarray): a segmented image
+            th3(ndarray): a segmented image
     '''
     hsv = cv2.cvtColor(bgr, cv2.COLOR_BGR2HSV)
     img = hsv[:, :, 1]
 
-    blur = cv2.GaussianBlur(img,(5,5),0)
-    ret3,th3 = cv2.threshold(blur,0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+    # blur = cv2.GaussianBlur(img,(5,5),0)
+    ret3,th3 = cv2.threshold(img,0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
 
     return th3
 

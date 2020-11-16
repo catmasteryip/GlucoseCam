@@ -42,6 +42,9 @@ dependencies {
 
     // api for simpler camera https://natario1.github.io/CameraView/home
     api 'com.otaliastudios:cameraview:2.6.4'
+
+    // api for plotting
+    implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
     // camerakit for easier camera https://github.com/CameraKit/camerakit-android
 //    implementation 'com.camerakit:camerakit:1.0.0-beta3.11'
 //    implementation 'com.camerakit:jpegkit:0.1.0'
